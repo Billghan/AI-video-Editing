@@ -39,30 +39,29 @@ else:
             st.success("Video başarıyla indirildi!")
             st.video("input.mp4")
 
-# 2. Müzik
-music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
-user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun?")
-# ... (Müzik işlemleri kısmı burası)
-            
-# GÜNCEL KISIM: TRY BLOĞU İÇİNDE OLMALI
- try:
-video = VideoFileClip("input.mp4")
-                
- # Müzik ekleme işlemleri...
- if music_file is not None:
- # ... (müzik kodların)
-video = video.with_audio(final_audio)
-                
- # İŞLEM SATIRI BURADA, TRY BLOĞUNUN      
-final_clip = video.subclipped(0, 10).transform(apply_effects)
-                
-final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
-st.success("İşlem tamamlandı!")
- st.video("final_video.mp4")
-                
-except Exception as e:
- # Hata yakalama bloğu try'dan hemen sonra gelmeli!
- st.error(f"Hata: {e}")
+# --- MÜZİK EKLEME KISMI (GÜNCEL) ---
+                if music_file is not None:
+                    # Ses dosyasını geçici olarak kaydet ve oku
+                    with open("temp_music_file", "wb") as f:
+                        f.write(music_file.getbuffer())
+                    
+                    # Ses dosyasını yükle
+                    audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
+                    
+                    # Videonun kendi sesini al (eğer varsa)
+                    if video.audio is not None:
+                        # İki sesi birleştir (Video sesi %50, arka plan müziği %20)
+                        video_audio = video.audio.with_volume_scaled(0.5)
+                        final_audio = CompositeAudioClip([
+                            video_audio, 
+                            audio_bg.with_duration(video.duration)
+                        ])
+                    else:
+                        # Video sesizse, sadece müziği kullan
+                        final_audio = audio_bg.with_duration(video.duration)
+                    
+                    # Sesi videoya ata
+                    video = video.with_audio(final_audio)
 
 # 3. İşlem
 if st.button("Düzenlemeyi Başlat"):
