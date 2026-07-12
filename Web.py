@@ -62,7 +62,8 @@ if st.button("Düzenlemeyi Başlat"):
                 
                 # GÜNCEL TRANSFORMATION
                 # 'transform' artık sadece 'frame' alır, 't' parametresine gerek yok
-                final_clip = video.subclipped(0, 10).transform(apply_effects)
+                # .transform() metoduna fonksiyonun kendisini (argümansız) veriyoruz
+final_clip = video.subclipped(0, 10).transform(apply_effects)
                 
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 st.success("İşlem tamamlandı!")
@@ -70,7 +71,15 @@ if st.button("Düzenlemeyi Başlat"):
             except Exception as e:
                 st.error(f"Hata: {e}")
 
-
-def apply_effects(frame, t):
-    # Çizim yok, sadece orijinal kareyi geri döndürüyoruz
-    return frame
+def apply_effects(get_frame, t):
+    # get_frame(t) diyerek o andaki kareyi (frame) alıyoruz
+    frame = get_frame(t)
+    
+    # Kopyasını al (cv2 işlemleri için zorunlu)
+    new_frame = frame.copy()
+    
+    # Çizimler
+    cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
+    cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    
+    return new_frame
