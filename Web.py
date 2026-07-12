@@ -53,8 +53,10 @@ if st.button("Düzenlemeye Başla"):
                     final_audio = CompositeAudioClip([video.audio, audio_bg.with_duration(video.duration)])
                     video = video.with_audio(final_audio)
                 
-                # Şimdilik sabit 10 saniye, Gemini bağlandığında burayı dinamik yapacağız
-                final = video.subclip(0, 10) 
+            # ... diğer kodlar ...
+                
+                # Güncellenmiş satır: .subclipped kullanıyoruz
+                final = video.subclipped(0, 10) 
                 final.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 
                 st.success("İşlem tamamlandı!")
