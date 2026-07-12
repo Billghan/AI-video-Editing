@@ -63,7 +63,7 @@ if st.button("Düzenlemeyi Başlat"):
                     video = video.with_audio(final_audio)
                 
                 # Dönüşüm
-                final_clip = video.subclipped(0, 10).transform(apply_effects)
+               final_clip = video.transform(apply_effects)
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 
                 st.success(f"İşlem tamamlandı! Promptunuz: {user_prompt}")
