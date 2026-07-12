@@ -42,7 +42,27 @@ else:
 # 2. Müzik
 music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
 user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun?")
-
+# ... (Müzik işlemleri kısmı burası)
+            
+            # GÜNCEL KISIM: TRY BLOĞU İÇİNDE OLMALI
+            try:
+                video = VideoFileClip("input.mp4")
+                
+                # Müzik ekleme işlemleri...
+                if music_file is not None:
+                    # ... (müzik kodların)
+                    video = video.with_audio(final_audio)
+                
+                # İŞLEM SATIRI BURADA, TRY BLOĞUNUN İÇİNDE
+                final_clip = video.subclipped(0, 10).transform(apply_effects)
+                
+                final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                st.success("İşlem tamamlandı!")
+                st.video("final_video.mp4")
+                
+            except Exception as e:
+                # Hata yakalama bloğu try'dan hemen sonra gelmeli!
+                st.error(f"Hata: {e}")
 # 3. İşlem
 if st.button("Düzenlemeyi Başlat"):
     if not os.path.exists("input.mp4"):
