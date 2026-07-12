@@ -1,7 +1,5 @@
 streamlit
 google-generativeai
-moviepy
-decorator==4.4.2
-proglog
-imageio
+imageio==2.25.1
 imageio-ffmpeg
+moviepy
