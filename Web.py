@@ -69,16 +69,21 @@ if st.button("Düzenlemeyi Başlat"):
                 except Exception as e: # TRY'IN TAM ALTINDA OLMALI
                     st.error(f"Hata: {e}")
                     
-# Fonksiyonu artık prompt'u da alacak şekilde güncelliyoruz
+# 'user_prompt' değişkenini 'prompt_text' parametresine bağlıyoruz
+processed_func = partial(apply_effects, prompt_text=user_prompt)
+final_clip = video.transform(processed_func)    
+
 def apply_effects(get_frame, t, prompt_text=""):
     frame = get_frame(t)
+    # Eğer renkler düzgün değilse şunu kullan (Genelde gereklidir):
+    # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+    
     new_frame = frame.copy()
     
-    # Eğer kullanıcı "daire" yazdıysa daireyi çiz
     if "daire" in prompt_text.lower():
+        # OpenCV BGR kullandığı için (0, 0, 255) kırmızıdır
         cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
     
-    # Eğer kullanıcı "yazı" yazdıysa metni yaz
     if "yazı" in prompt_text.lower():
         cv2.putText(new_frame, "AI Video", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         
