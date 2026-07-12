@@ -18,8 +18,9 @@ def apply_effects(get_frame, t):
 st.set_page_config(page_title="AI Video Düzenleyici", page_icon="🎬")
 st.title("🎬 AI Video Düzenleyici - Pro Sürüm")
 
-# 1. Girişler (Butonun dışına taşıdık)
+# 1. GİRİŞLER (Buraya prompt ekledik)
 option = st.radio("İçerik kaynağını seç:", ("Bilgisayardan Yükle", "YouTube Linki"))
+user_prompt = st.text_input("Düzenleme için prompt gir (Örn: 'Videonun ortasına daire ekle'):")
 music_file = st.file_uploader("Bir müzik dosyası yükle (MP3/WAV)", type=["mp3", "wav"])
 
 if option == "Bilgisayardan Yükle":
@@ -38,8 +39,9 @@ else:
             st.success("Video başarıyla indirildi!")
             st.video("input.mp4")
 
-# 2. İşlem Butonu
+# 2. İŞLEM BUTONU
 if st.button("Düzenlemeyi Başlat"):
+    # Prompt burada kullanılabilir (Örn: st.write(f"Şu prompt işleniyor: {user_prompt}"))
     if not os.path.exists("input.mp4"):
         st.warning("Önce bir video hazırlayın!")
     else:
@@ -47,7 +49,7 @@ if st.button("Düzenlemeyi Başlat"):
             try:
                 video = VideoFileClip("input.mp4")
                 
-                # Müzik ekleme (Butonun içinde, değişkenler hazır)
+                # Müzik ekleme
                 if music_file is not None:
                     with open("temp_music_file", "wb") as f:
                         f.write(music_file.getbuffer())
@@ -60,11 +62,11 @@ if st.button("Düzenlemeyi Başlat"):
                         final_audio = audio_bg.with_duration(video.duration)
                     video = video.with_audio(final_audio)
                 
-                # Dönüşüm ve çıktı
+                # Dönüşüm
                 final_clip = video.subclipped(0, 10).transform(apply_effects)
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 
-                st.success("İşlem tamamlandı!")
+                st.success(f"İşlem tamamlandı! Promptunuz: {user_prompt}")
                 st.video("final_video.mp4")
             except Exception as e:
                 st.error(f"Hata: {e}")
