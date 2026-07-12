@@ -1,79 +1,48 @@
 import streamlit as st
 import numpy as np
 import cv2
+import os
+import google.generativeai as genai
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.audio.AudioClip import CompositeAudioClip
-import yt_dlp
-import os
 from functools import partial
+import yt_dlp
 
-# 1. ÖNCE FONKSİYONU TANIMLA (En üstte olmalı)
-def apply_effects(get_frame, t, prompt_text=""):
+# --- KONFİGÜRASYON ---
+# Streamlit'in sol altındaki Manage App -> Secrets kısmına GOOGLE_API_KEY ekle!
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+
+def analyze_frame_with_gemini(frame):
+    """Her kareyi Gemini'ye gönderip önemli bir olay var mı diye soruyoruz."""
+    # Görüntüyü geçici olarak kaydet
+    cv2.imwrite("temp_frame.jpg", frame)
+    sample_file = genai.upload_file("temp_frame.jpg")
+    
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content([sample_file, "Bu oyun görüntüsünde önemli bir aksiyon (düşman, hamle, yazı) var mı? Varsa 'EVET' de ve kısaca ne olduğunu söyle, yoksa 'HAYIR' de."])
+    
+    return response.text
+
+def apply_effects(get_frame, t, user_prompt):
     frame = get_frame(t)
-    new_frame = frame.copy()
-    
-    if "daire" in prompt_text.lower():
-        cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
-    
-    if "yazı" in prompt_text.lower():
-        cv2.putText(new_frame, "AI Video", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-        
-    return new_frame
+    # Analiz fonksiyonunu her 30 karede bir çalıştır (performans için)
+    if int(t * 30) % 30 == 0: 
+        analysis = analyze_frame_with_gemini(frame)
+        if "EVET" in analysis.upper():
+            cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
+            cv2.putText(frame, "ONEMLI AN!", (500, 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    return frame
 
-st.set_page_config(page_title="AI Video Düzenleyici", page_icon="🎬")
-st.title("🎬 AI Video Düzenleyici - Pro Sürüm")
+# --- ARAYÜZ (Aynı kalabilir, sadece buton içini değiştiriyoruz) ---
+st.title("🎬 AI Akıllı Video Editör")
+user_prompt = st.text_input("Ne tür anları yakalayalım? (Örn: 'Satranç hamlesi', 'PUBG çatışma')")
 
-# 2. GİRİŞLER
-option = st.radio("İçerik kaynağını seç:", ("Bilgisayardan Yükle", "YouTube Linki"))
-user_prompt = st.text_input("Düzenleme için prompt gir (Örn: 'daire', 'yazı'):")
-music_file = st.file_uploader("Bir müzik dosyası yükle (MP3/WAV)", type=["mp3", "wav"])
-
-if option == "Bilgisayardan Yükle":
-    uploaded_file = st.file_uploader("Videonuzu yükleyin:", type=["mp4"])
-    if uploaded_file is not None:
-        with open("input.mp4", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        st.video("input.mp4")
-else:
-    youtube_url = st.text_input("YouTube linkini yapıştırın:")
-    if st.button("YouTube Videosunu İndir"):
-        with st.spinner('YouTube videosu indiriliyor...'):
-            ydl_opts = {'format': 'best', 'outtmpl': 'input.mp4'}
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([youtube_url])
-            st.success("Video başarıyla indirildi!")
-            st.video("input.mp4")
-
-# 3. İŞLEM BUTONU
-if st.button("Düzenlemeyi Başlat"):
-    if not os.path.exists("input.mp4"):
-        st.warning("Önce bir video hazırlayın!")
-    else:
-        with st.spinner('Video işleniyor...'):
-            try:
-                video = VideoFileClip("input.mp4")
-                
-                # Müzik ekleme
-                if music_file is not None:
-                    with open("temp_music_file", "wb") as f:
-                        f.write(music_file.getbuffer())
-                    audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
-                    
-                    if video.audio is not None:
-                        video_audio = video.audio.with_volume_scaled(0.5)
-                        final_audio = CompositeAudioClip([video_audio, audio_bg.with_duration(video.duration)])
-                    else:
-                        final_audio = audio_bg.with_duration(video.duration)
-                    video = video.with_audio(final_audio)
-                
-                # DÖNÜŞÜM (Partial kullanarak fonksiyonu buraya bağlıyoruz)
-                processed_func = partial(apply_effects, prompt_text=user_prompt)
-                final_clip = video.transform(processed_func)
-                
-                final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
-                
-                st.success(f"İşlem tamamlandı! Promptunuz: {user_prompt}")
-                st.video("final_video.mp4")
-            except Exception as e:
-                st.error(f"Hata: {e}")
+if st.button("Akıllı Düzenlemeyi Başlat"):
+    # ... (Dosya yükleme ve indirme kısımları aynı kalacak) ...
+    video = VideoFileClip("input.mp4")
+    # Akıllı dönüştürme
+    processed_func = partial(apply_effects, user_prompt=user_prompt)
+    final_clip = video.transform(processed_func)
+    final_clip.write_videofile("final_video.mp4")
+    st.video("final_video.mp4")
