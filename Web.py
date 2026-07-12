@@ -40,6 +40,8 @@ else:
             st.video("input.mp4")
 
 # --- MÜZİK EKLEME KISMI (GÜNCEL) ---
+# Müzik dosyasını yukarıda tanımlıyoruz ki tüm kod erişebilsin
+music_file = st.file_uploader("Bir müzik dosyası yükle (MP3/WAV)", type=["mp3", "wav"])
 if music_file is not None:
                     # Ses dosyasını geçici olarak kaydet ve oku
                     with open("temp_music_file", "wb") as f:
