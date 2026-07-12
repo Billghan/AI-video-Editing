@@ -71,16 +71,6 @@ if st.button("Düzenlemeyi Başlat"):
                 st.error(f"Hata: {e}")
 
 
-def apply_effects(frame, *args):
-    # Eğer frame bir numpy dizisi değilse (moviepy bazen farklı format gönderir), zorla dönüştür
-    if not isinstance(frame, np.ndarray):
-        frame = np.array(frame)
-        
-    # Kopyasını al
-    new_frame = frame.copy()
-    
-    # Çizim işlemleri
-    cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
-    cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    
-    return new_frame
+def apply_effects(frame, t):
+    # Çizim yok, sadece orijinal kareyi geri döndürüyoruz
+    return frame
