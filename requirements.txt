@@ -1,5 +1,7 @@
 streamlit
 google-generativeai
 moviepy
-Pillow
-python-dotenv
+decorator==4.4.2
+proglog
+imageio
+imageio-ffmpeg
