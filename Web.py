@@ -32,43 +32,34 @@ else:
 # 2. Müzik Yükleme
 music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
 
-# 3. Prompt ve İşlem
-user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun? (Örn: İlk 10 saniyeyi al)")
-
+# 3. İşlem
 if st.button("Düzenlemeyi Başlat"):
     if not os.path.exists("input.mp4"):
         st.warning("Önce bir video hazırlayın!")
     else:
         with st.spinner('Video işleniyor...'):
             try:
-                # Videoyu yükle
                 video = VideoFileClip("input.mp4")
                 
-                # Müzik ekleme ve ses karıştırma
+                # Müzik işlemleri
                 if music_file is not None:
                     with open("temp_music_file", "wb") as f:
                         f.write(music_file.getbuffer())
-                    
-                    audio_bg = AudioFileClip("temp_music_file")
-                    audio_bg = audio_bg.with_volume_scaled(0.2) # Müzik sesi %20
-                    
-                    # Sesleri birleştir (Orijinal ses %50, arka plan müziği %20)
-                    final_audio = CompositeAudioClip([video.audio.with_volume_scaled(0.5), 
-                                                      audio_bg.with_duration(video.duration)])
+                    audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
+                    final_audio = CompositeAudioClip([video.audio.with_volume_scaled(0.5), audio_bg.with_duration(video.duration)])
                     video = video.with_audio(final_audio)
                 
-                # Görüntüye çizim yapma fonksiyonu (OpenCV)
-                def add_effects(frame):
-                    # Daire içine alma (x=640, y=360, yarıçap=100, renk=kırmızı)
+                # Çizim Fonksiyonu
+                def apply_effects(get_frame, t):
+                    frame = get_frame(t)
+                    # Daire ve Yazı
                     cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
-                    # Altyazı ekleme
                     cv2.putText(frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     return frame
 
-                # Efektleri uygula ve videoyu kırp
-                final_clip = video.subclipped(0, 10).fl_image(add_effects)
+                # HATA BURADA ÇÖZÜLDÜ: .fl() metodu kullanıldı
+                final_clip = video.subclipped(0, 10).fl(apply_effects)
                 
-                # Kaydet
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 
                 st.success("İşlem tamamlandı!")
