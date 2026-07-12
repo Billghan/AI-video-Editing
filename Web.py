@@ -63,10 +63,26 @@ if st.button("Düzenlemeyi Başlat"):
                     video = video.with_audio(final_audio)
                 
                 # Dönüşüm
-               final_clip = video.transform(apply_effects)
+               # Lambda ile prompt değerini fonksiyona iletiyoruz
+final_clip = video.transform(lambda gf, t: apply_effects(gf, t, user_prompt))
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 
                 st.success(f"İşlem tamamlandı! Promptunuz: {user_prompt}")
                 st.video("final_video.mp4")
             except Exception as e:
                 st.error(f"Hata: {e}")
+
+# Fonksiyonu artık prompt'u da alacak şekilde güncelliyoruz
+def apply_effects(get_frame, t, prompt_text=""):
+    frame = get_frame(t)
+    new_frame = frame.copy()
+    
+    # Eğer kullanıcı "daire" yazdıysa daireyi çiz
+    if "daire" in prompt_text.lower():
+        cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
+    
+    # Eğer kullanıcı "yazı" yazdıysa metni yaz
+    if "yazı" in prompt_text.lower():
+        cv2.putText(new_frame, "AI Video", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        
+    return new_frame
