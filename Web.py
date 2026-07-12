@@ -32,10 +32,15 @@ else:
 # 2. Müzik Yükleme
 music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
 
-# 3. İşlem
+# 3. PROMPT KUTUSU GERİ GELDİ
+user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun? (Örn: İlk 10 saniyeyi al)")
+
+# 4. İşlem
 if st.button("Düzenlemeyi Başlat"):
     if not os.path.exists("input.mp4"):
         st.warning("Önce bir video hazırlayın!")
+    elif not user_prompt:
+        st.warning("Lütfen bir komut girin!")
     else:
         with st.spinner('Video işleniyor...'):
             try:
@@ -52,14 +57,11 @@ if st.button("Düzenlemeyi Başlat"):
                 # Çizim Fonksiyonu
                 def apply_effects(get_frame, t):
                     frame = get_frame(t)
-                    # Daire ve Yazı
                     cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
                     cv2.putText(frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     return frame
 
-                # HATA BURADA ÇÖZÜLDÜ: .fl() metodu kullanıldı
                 final_clip = video.subclipped(0, 10).fl(apply_effects)
-                
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 
                 st.success("İşlem tamamlandı!")
