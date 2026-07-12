@@ -53,3 +53,31 @@ if st.button("Düzenlemeye Başla"):
                 st.video("output.mp4")
             except Exception as e:
                 st.error(f"Hata: {e}")
+
+# ... (Üstteki kodların aynısı kalıyor)
+
+# MÜZİK YÜKLEME ALANI
+music_file = st.file_uploader("Arka plana eklemek için bir müzik yükleyin (MP3):", type=["mp3"])
+
+if st.button("Müzik ve Videoyu Birleştir"):
+    if not os.path.exists("input.mp4"):
+        st.warning("Lütfen önce video yükleyin!")
+    elif music_file is None:
+        st.warning("Lütfen bir müzik dosyası seçin!")
+    else:
+        with st.spinner('Müzik videoya ekleniyor...'):
+            # Video ve Müziği Yükle
+            video_clip = vf.VideoFileClip("input.mp4")
+            audio_clip = vf.AudioFileClip(music_file)
+            
+            # Müziği videonun uzunluğuna eşitle (loop et veya kırp)
+            # Burada sadece basit bir eşitleme yapıyoruz
+            final_audio = audio_clip.subclip(0, video_clip.duration)
+            
+            # Sesi videoya ata
+            final_video = video_clip.set_audio(final_audio)
+            
+            # Kaydet
+            final_video.write_videofile("output_music.mp4", codec="libx264", audio_codec="aac")
+            st.success("İşlem tamamlandı!")
+            st.video("output_music.mp4")
