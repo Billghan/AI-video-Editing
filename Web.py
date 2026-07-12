@@ -1,26 +1,78 @@
 import streamlit as st
-import cv2
 import numpy as np
-from moviepy.editor import *
+import cv2
+from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
+from moviepy.audio.AudioClip import CompositeAudioClip
+import yt_dlp
+import os
 
-def add_circle_and_text(frame):
-    # Daire çiz (Örn: Ekranın ortasına)
-    cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
-    # Altyazı ekle
-    cv2.putText(frame, "Buraya Dikkat!", (500, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    return frame
+st.set_page_config(page_title="AI Video Düzenleyici", page_icon="🎬")
+st.title("🎬 AI Video Düzenleyici - Pro Sürüm")
 
-# Video işleme kısmı
+# 1. Video Kaynağı
+option = st.radio("İçerik kaynağını seç:", ("Bilgisayardan Yükle", "YouTube Linki"))
+
+if option == "Bilgisayardan Yükle":
+    uploaded_file = st.file_uploader("Videonuzu yükleyin:", type=["mp4"])
+    if uploaded_file is not None:
+        with open("input.mp4", "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.video("input.mp4")
+else:
+    youtube_url = st.text_input("YouTube linkini yapıştırın:")
+    if st.button("YouTube Videosunu İndir"):
+        with st.spinner('YouTube videosu indiriliyor...'):
+            ydl_opts = {'format': 'best', 'outtmpl': 'input.mp4'}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([youtube_url])
+            st.success("Video başarıyla indirildi!")
+            st.video("input.mp4")
+
+# 2. Müzik Yükleme
+music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
+
+# 3. Prompt ve İşlem
+user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun? (Örn: İlk 10 saniyeyi al)")
+
 if st.button("Düzenlemeyi Başlat"):
-    video = VideoFileClip("input.mp4")
-    
-    # 1. Müziğin sesini kıs (volumex ile)
-    if music_file is not None:
-        audio = AudioFileClip("temp_music_file").volumex(0.2)
-        video = video.set_audio(CompositeAudioClip([video.audio.volumex(0.5), audio]))
+    if not os.path.exists("input.mp4"):
+        st.warning("Önce bir video hazırlayın!")
+    else:
+        with st.spinner('Video işleniyor...'):
+            try:
+                # Videoyu yükle
+                video = VideoFileClip("input.mp4")
+                
+                # Müzik ekleme ve ses karıştırma
+                if music_file is not None:
+                    with open("temp_music_file", "wb") as f:
+                        f.write(music_file.getbuffer())
+                    
+                    audio_bg = AudioFileClip("temp_music_file")
+                    audio_bg = audio_bg.with_volume_scaled(0.2) # Müzik sesi %20
+                    
+                    # Sesleri birleştir (Orijinal ses %50, arka plan müziği %20)
+                    final_audio = CompositeAudioClip([video.audio.with_volume_scaled(0.5), 
+                                                      audio_bg.with_duration(video.duration)])
+                    video = video.with_audio(final_audio)
+                
+                # Görüntüye çizim yapma fonksiyonu (OpenCV)
+                def add_effects(frame):
+                    # Daire içine alma (x=640, y=360, yarıçap=100, renk=kırmızı)
+                    cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
+                    # Altyazı ekleme
+                    cv2.putText(frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    return frame
 
-    # 2. Görüntüye efekt ekle (fl_image ile her kareyi değiştiriyoruz)
-    final_video = video.fl_image(add_circle_and_text)
-    
-    final_video.write_videofile("final.mp4", codec="libx264")
-    st.video("final.mp4")
+                # Efektleri uygula ve videoyu kırp
+                final_clip = video.subclipped(0, 10).fl_image(add_effects)
+                
+                # Kaydet
+                final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                
+                st.success("İşlem tamamlandı!")
+                st.video("final_video.mp4")
+                
+            except Exception as e:
+                st.error(f"Hata: {e}")
