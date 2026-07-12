@@ -92,14 +92,12 @@ final_clip = video.subclipped(0, 10).transform(apply_effects)
                 st.error(f"Hata: {e}")
 
 def apply_effects(get_frame, t):
-    # get_frame(t) diyerek o andaki kareyi (frame) alıyoruz
+    # 1. Kareyi al
     frame = get_frame(t)
-    
-    # Kopyasını al (cv2 işlemleri için zorunlu)
+    # 2. İşlem yapabilmek için kopyala
     new_frame = frame.copy()
-    
-    # Çizimler
+    # 3. Çizimler
     cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
     cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    
+    # 4. İşlenmiş kareyi döndür
     return new_frame
