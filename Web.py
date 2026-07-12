@@ -38,40 +38,37 @@ else:
                 ydl.download([youtube_url])
             st.success("Video başarıyla indirildi!")
             st.video("input.mp4")
-
-# 2. İŞLEM BUTONU
 if st.button("Düzenlemeyi Başlat"):
-    # Prompt burada kullanılabilir (Örn: st.write(f"Şu prompt işleniyor: {user_prompt}"))
-    if not os.path.exists("input.mp4"):
-        st.warning("Önce bir video hazırlayın!")
-    else:
-        with st.spinner('Video işleniyor...'):
-            try:
-                video = VideoFileClip("input.mp4")
-                
-                # Müzik ekleme
-                if music_file is not None:
-                    with open("temp_music_file", "wb") as f:
-                        f.write(music_file.getbuffer())
-                    audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
+        if not os.path.exists("input.mp4"):
+            st.warning("Önce bir video hazırlayın!")
+        else:
+            with st.spinner('Video işleniyor...'):
+                try:
+                    video = VideoFileClip("input.mp4")
                     
-                    if video.audio is not None:
-                        video_audio = video.audio.with_volume_scaled(0.5)
-                        final_audio = CompositeAudioClip([video_audio, audio_bg.with_duration(video.duration)])
-                    else:
-                        final_audio = audio_bg.with_duration(video.duration)
-                    video = video.with_audio(final_audio)
-                
-                # Dönüşüm
-               # Lambda ile prompt değerini fonksiyona iletiyoruz
-final_clip = video.transform(lambda gf, t: apply_effects(gf, t, user_prompt))
-                final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
-                
-                st.success(f"İşlem tamamlandı! Promptunuz: {user_prompt}")
-                st.video("final_video.mp4")
-            except Exception as e:
-                st.error(f"Hata: {e}")
-
+                    # Müzik ekleme
+                    if music_file is not None:
+                        with open("temp_music_file", "wb") as f:
+                            f.write(music_file.getbuffer())
+                        audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
+                        
+                        if video.audio is not None:
+                            video_audio = video.audio.with_volume_scaled(0.5)
+                            final_audio = CompositeAudioClip([video_audio, audio_bg.with_duration(video.duration)])
+                        else:
+                            final_audio = audio_bg.with_duration(video.duration)
+                        video = video.with_audio(final_audio)
+                    
+                    # DÖNÜŞÜM (Hizalaması 'try' ile aynı seviyede, 'except'in üzerinde)
+                    final_clip = video.transform(lambda gf, t: apply_effects(gf, t, user_prompt))
+                    final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                    
+                    st.success(f"İşlem tamamlandı! Promptunuz: {user_prompt}")
+                    st.video("final_video.mp4")
+                    
+                except Exception as e: # TRY'IN TAM ALTINDA OLMALI
+                    st.error(f"Hata: {e}")
+                    
 # Fonksiyonu artık prompt'u da alacak şekilde güncelliyoruz
 def apply_effects(get_frame, t, prompt_text=""):
     frame = get_frame(t)
