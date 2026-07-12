@@ -6,6 +6,11 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from functools import partial
 
 # Gemini Konfigürasyonu
+st.write("Secrets kontrol ediliyor...")
+if "GOOGLE_API_KEY" in st.secrets:
+    st.write("API Key bulundu!")
+else:
+    st.error("API Key hala bulunamadı! Lütfen Secrets panelini kontrol et.")
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 def get_important_seconds(video_path, prompt):
