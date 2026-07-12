@@ -80,10 +80,8 @@ if st.button("Düzenlemeyi Başlat"):
                     final_audio = CompositeAudioClip([video.audio.with_volume_scaled(0.5), audio_bg.with_duration(video.duration)])
                     video = video.with_audio(final_audio)
                 
-                # GÜNCEL TRANSFORMATION
-                # 'transform' artık sadece 'frame' alır, 't' parametresine gerek yok
-                # .transform() metoduna fonksiyonun kendisini (argümansız) veriyoruz
-final_clip = video.subclipped(0, 10).transform(apply_effects)
+                # GÜNCEL TRANSFORMATION (Hizalama Düzeltildi)
+                final_clip = video.subclipped(0, 10).transform(apply_effects)
                 
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 st.success("İşlem tamamlandı!")
@@ -91,13 +89,13 @@ final_clip = video.subclipped(0, 10).transform(apply_effects)
             except Exception as e:
                 st.error(f"Hata: {e}")
 
-def apply_effects(get_frame, t):
-    # 1. Kareyi al
-    frame = get_frame(t)
-    # 2. İşlem yapabilmek için kopyala
+# MoviePy v2.0+ için fonksiyon güncellendi (Sadece 'frame' alır)
+def apply_effects(frame):
+    # 1. İşlem yapabilmek için kareyi kopyala
     new_frame = frame.copy()
-    # 3. Çizimler
+    # 2. Çizimler (cv2 işlemleri)
     cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
     cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    # 4. İşlenmiş kareyi döndür
+    # 3. İşlenmiş kareyi döndür
     return new_frame
+
