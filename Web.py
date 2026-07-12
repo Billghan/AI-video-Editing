@@ -7,21 +7,20 @@ from moviepy.audio.AudioClip import CompositeAudioClip
 import yt_dlp
 import os
 
-# --- FONKSİYON EN ÜSTTE TANIMLANDI ---
-def apply_effects(frame):
-    # Çerçeveyi kopyalıyoruz (cv2'nin hata vermemesi için gerekli)
+# moviepy v2.0+ uyumlu transform fonksiyonu
+def apply_effects(get_frame, t):
+    frame = get_frame(t)
     new_frame = frame.copy()
-    # Daire çiz
     cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
-    # Metin yaz
     cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     return new_frame
 
 st.set_page_config(page_title="AI Video Düzenleyici", page_icon="🎬")
 st.title("🎬 AI Video Düzenleyici - Pro Sürüm")
 
-# 1. Video Kaynağı
+# 1. Girişler (Butonun dışına taşıdık)
 option = st.radio("İçerik kaynağını seç:", ("Bilgisayardan Yükle", "YouTube Linki"))
+music_file = st.file_uploader("Bir müzik dosyası yükle (MP3/WAV)", type=["mp3", "wav"])
 
 if option == "Bilgisayardan Yükle":
     uploaded_file = st.file_uploader("Videonuzu yükleyin:", type=["mp4"])
@@ -39,33 +38,7 @@ else:
             st.success("Video başarıyla indirildi!")
             st.video("input.mp4")
 
-# --- MÜZİK EKLEME KISMI (GÜNCEL) ---
-# Müzik dosyasını yukarıda tanımlıyoruz ki tüm kod erişebilsin
-music_file = st.file_uploader("Bir müzik dosyası yükle (MP3/WAV)", type=["mp3", "wav"])
-if music_file is not None:
-                    # Ses dosyasını geçici olarak kaydet ve oku
-                    with open("temp_music_file", "wb") as f:
-                        f.write(music_file.getbuffer())
-                    
-                    # Ses dosyasını yükle
-                    audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
-                    
-                    # Videonun kendi sesini al (eğer varsa)
-                    if video.audio is not None:
-                        # İki sesi birleştir (Video sesi %50, arka plan müziği %20)
-                        video_audio = video.audio.with_volume_scaled(0.5)
-                        final_audio = CompositeAudioClip([
-                            video_audio, 
-                            audio_bg.with_duration(video.duration)
-                        ])
-                    else:
-                        # Video sesizse, sadece müziği kullan
-                        final_audio = audio_bg.with_duration(video.duration)
-                    
-                    # Sesi videoya ata
-                    video = video.with_audio(final_audio)
-
-# 3. İşlem
+# 2. İşlem Butonu
 if st.button("Düzenlemeyi Başlat"):
     if not os.path.exists("input.mp4"):
         st.warning("Önce bir video hazırlayın!")
@@ -74,30 +47,24 @@ if st.button("Düzenlemeyi Başlat"):
             try:
                 video = VideoFileClip("input.mp4")
                 
-                # Müzik ekleme
+                # Müzik ekleme (Butonun içinde, değişkenler hazır)
                 if music_file is not None:
                     with open("temp_music_file", "wb") as f:
                         f.write(music_file.getbuffer())
                     audio_bg = AudioFileClip("temp_music_file").with_volume_scaled(0.2)
-                    final_audio = CompositeAudioClip([video.audio.with_volume_scaled(0.5), audio_bg.with_duration(video.duration)])
+                    
+                    if video.audio is not None:
+                        video_audio = video.audio.with_volume_scaled(0.5)
+                        final_audio = CompositeAudioClip([video_audio, audio_bg.with_duration(video.duration)])
+                    else:
+                        final_audio = audio_bg.with_duration(video.duration)
                     video = video.with_audio(final_audio)
                 
-                # GÜNCEL TRANSFORMATION (Hizalama Düzeltildi)
+                # Dönüşüm ve çıktı
                 final_clip = video.subclipped(0, 10).transform(apply_effects)
-                
                 final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                
                 st.success("İşlem tamamlandı!")
                 st.video("final_video.mp4")
             except Exception as e:
                 st.error(f"Hata: {e}")
-
-# MoviePy v2.0+ için fonksiyon güncellendi (Sadece 'frame' alır)
-def apply_effects(frame):
-    # 1. İşlem yapabilmek için kareyi kopyala
-    new_frame = frame.copy()
-    # 2. Çizimler (cv2 işlemleri)
-    cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
-    cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    # 3. İşlenmiş kareyi döndür
-    return new_frame
-
