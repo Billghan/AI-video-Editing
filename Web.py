@@ -69,3 +69,10 @@ if st.button("Düzenlemeyi Başlat"):
                 st.video("final_video.mp4")
             except Exception as e:
                 st.error(f"Hata: {e}")
+
+# Fonksiyonu bu şekilde güncelle:
+def apply_effects(frame, t=None): # t=None ekleyerek hem 1 hem 2 argümanı kabul etmesini sağlıyoruz
+    new_frame = frame.copy()
+    cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
+    cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    return new_frame
