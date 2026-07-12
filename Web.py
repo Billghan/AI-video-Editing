@@ -40,7 +40,7 @@ else:
             st.video("input.mp4")
 
 # --- MÜZİK EKLEME KISMI (GÜNCEL) ---
-                if music_file is not None:
+if music_file is not None:
                     # Ses dosyasını geçici olarak kaydet ve oku
                     with open("temp_music_file", "wb") as f:
                         f.write(music_file.getbuffer())
