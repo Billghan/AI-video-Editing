@@ -1,6 +1,5 @@
 import streamlit as st
 import moviepy.video.io.VideoFileClip as vf
-# GÜNCEL IMPORTLAR
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.audio.AudioClip import CompositeAudioClip
 import yt_dlp
@@ -31,28 +30,33 @@ else:
 # MÜZİK YÜKLEME
 music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
 
+# --- İŞTE PROMPT YAZMA YERİ BURADA ---
+user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun? (Örn: İlk 15 saniyeyi kes)")
+
 if st.button("Düzenlemeye Başla"):
     if not os.path.exists("input.mp4"):
         st.warning("Önce bir video hazırlayın!")
+    elif not user_prompt:
+        st.warning("Lütfen bir komut girin!")
     else:
         with st.spinner('Video işleniyor...'):
             try:
                 video = vf.VideoFileClip("input.mp4")
                 
                 if music_file is not None:
-                    # Geçici dosyaya yazma
                     with open("temp_music_file", "wb") as f:
                         f.write(music_file.getbuffer())
                     
                     audio_bg = AudioFileClip("temp_music_file")
-                    audio_bg = audio_bg.with_volume_scaled(0.3) # Yeni sürümde .volumex yerine bu kullanılır
+                    audio_bg = audio_bg.with_volume_scaled(0.3)
                     
-                    # Sesi karıştır
                     final_audio = CompositeAudioClip([video.audio, audio_bg.with_duration(video.duration)])
-                    video = video.with_audio(final_audio) # Yeni sürümde .set_audio yerine .with_audio
+                    video = video.with_audio(final_audio)
                 
-                # Kayıt
-                video.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                # Şimdilik sabit 10 saniye, Gemini bağlandığında burayı dinamik yapacağız
+                final = video.subclip(0, 10) 
+                final.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                
                 st.success("İşlem tamamlandı!")
                 st.video("final_video.mp4")
                 
