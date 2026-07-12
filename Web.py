@@ -69,10 +69,14 @@ if st.button("Düzenlemeyi Başlat"):
                 st.video("final_video.mp4")
             except Exception as e:
                 st.error(f"Hata: {e}")
-def apply_effects(frame, t):
-    # Fonksiyon artık hem frame'i hem de t'yi kabul ediyor
+
+
+def apply_effects(frame, *args):
+    # *args, gönderilen diğer tüm parametreleri (t gibi) yutar ve hatayı yok eder
     new_frame = frame.copy()
+    
     # Daire ve yazı çizimi
     cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
     cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    
     return new_frame
