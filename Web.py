@@ -69,3 +69,13 @@ if st.button("Düzenlemeyi Başlat"):
                 
             except Exception as e:
                 st.error(f"Hata: {e}")
+
+# Çizim Fonksiyonu (Aynı kalıyor)
+                def apply_effects(frame, t):
+                    # Not: Transform fonksiyonu 'frame, t' sırasıyla alır
+                    cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
+                    cv2.putText(frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    return frame
+
+                # GÜNCEL KULLANIM:
+                final_clip = video.subclipped(0, 10).transform(apply_effects)
