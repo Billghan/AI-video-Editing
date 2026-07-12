@@ -7,6 +7,16 @@ from moviepy.audio.AudioClip import CompositeAudioClip
 import yt_dlp
 import os
 
+# --- FONKSİYON EN ÜSTTE TANIMLANDI ---
+def apply_effects(frame):
+    # Çerçeveyi kopyalıyoruz (cv2'nin hata vermemesi için gerekli)
+    new_frame = frame.copy()
+    # Daire çiz
+    cv2.circle(new_frame, (640, 360), 100, (0, 0, 255), 5)
+    # Metin yaz
+    cv2.putText(new_frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    return new_frame
+
 st.set_page_config(page_title="AI Video Düzenleyici", page_icon="🎬")
 st.title("🎬 AI Video Düzenleyici - Pro Sürüm")
 
@@ -29,24 +39,20 @@ else:
             st.success("Video başarıyla indirildi!")
             st.video("input.mp4")
 
-# 2. Müzik Yükleme
+# 2. Müzik
 music_file = st.file_uploader("Arka plana eklemek için müzik/ses yükleyin:", type=["mp3", "wav", "ogg", "aac", "m4a"])
+user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun?")
 
-# 3. PROMPT KUTUSU GERİ GELDİ
-user_prompt = st.text_input("Videonla ilgili ne yapmak istiyorsun? (Örn: İlk 10 saniyeyi al)")
-
-# 4. İşlem
+# 3. İşlem
 if st.button("Düzenlemeyi Başlat"):
     if not os.path.exists("input.mp4"):
         st.warning("Önce bir video hazırlayın!")
-    elif not user_prompt:
-        st.warning("Lütfen bir komut girin!")
     else:
         with st.spinner('Video işleniyor...'):
             try:
                 video = VideoFileClip("input.mp4")
                 
-                # Müzik işlemleri
+                # Müzik ekleme
                 if music_file is not None:
                     with open("temp_music_file", "wb") as f:
                         f.write(music_file.getbuffer())
@@ -54,28 +60,12 @@ if st.button("Düzenlemeyi Başlat"):
                     final_audio = CompositeAudioClip([video.audio.with_volume_scaled(0.5), audio_bg.with_duration(video.duration)])
                     video = video.with_audio(final_audio)
                 
-                # Çizim Fonksiyonu
-                def apply_effects(get_frame, t):
-                    frame = get_frame(t)
-                    cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
-                    cv2.putText(frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-                    return frame
-
-                final_clip = video.subclipped(0, 10).fl(apply_effects)
-                final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
+                # GÜNCEL TRANSFORMATION
+                # 'transform' artık sadece 'frame' alır, 't' parametresine gerek yok
+                final_clip = video.subclipped(0, 10).transform(apply_effects)
                 
+                final_clip.write_videofile("final_video.mp4", codec="libx264", audio_codec="aac")
                 st.success("İşlem tamamlandı!")
                 st.video("final_video.mp4")
-                
             except Exception as e:
                 st.error(f"Hata: {e}")
-
-# Çizim Fonksiyonu (Aynı kalıyor)
-                def apply_effects(frame, t):
-                    # Not: Transform fonksiyonu 'frame, t' sırasıyla alır
-                    cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
-                    cv2.putText(frame, "Onemli An!", (500, 360), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-                    return frame
-
-                # GÜNCEL KULLANIM:
-                final_clip = video.subclipped(0, 10).transform(apply_effects)
