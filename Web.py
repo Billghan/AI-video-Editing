@@ -32,3 +32,25 @@ elif menu == "Düzenleme (Render)":
     if st.button("Render Başlat"):
         # plan.json'u yükle ve apply_smart_effects fonksiyonunu çalıştır.
         pass
+
+# --- Girişten Sonrası ---
+st.title("🎬 PreBGlobal - Yönetmen Paneli")
+
+# Mod Seçimi
+mod = st.sidebar.radio("İşlem Modu:", ["Analiz", "Kurgu"])
+
+if mod == "Analiz":
+    st.subheader("🔍 1. Adım: Videoyu Analiz Et")
+    uploaded_file = st.file_uploader("Ham videoyu yükle", type=["mp4"])
+    user_prompt = st.text_input("Gemini'ye neyi bulsun? (Örn: Çatışma anları, sessiz boşluklar)")
+    
+    if st.button("Analizi Başlat"):
+        # Buraya Gemini ile analiz yapıp 'plan.json' oluşturan fonksiyon gelecek
+        st.write("Analiz tamamlandı. Plan dosyası hazırlandı.")
+
+elif mod == "Kurgu":
+    st.subheader("🛠️ 2. Adım: Kurgu Fabrikası")
+    if st.button("Kurguyu Uygula"):
+        # Buraya senin istediğin o 'islem.py' mantığı gelecek
+        # Hem 'plan.json'u okuyacak hem senin 'kurgu komutlarını' (müzik, yazı vb.) işleyecek
+        st.write("Video işleniyor, lütfen bekleyin...")
