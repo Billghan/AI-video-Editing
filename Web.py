@@ -54,3 +54,6 @@ elif mod == "Kurgu":
         # Buraya senin istediğin o 'islem.py' mantığı gelecek
         # Hem 'plan.json'u okuyacak hem senin 'kurgu komutlarını' (müzik, yazı vb.) işleyecek
         st.write("Video işleniyor, lütfen bekleyin...")
+
+if st.button("Analizi Başlat", key="analiz_btn"):
+if st.button("Kurguyu Uygula", key="kurgu_btn"):
