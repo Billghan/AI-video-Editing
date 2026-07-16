@@ -2,13 +2,12 @@ import streamlit as st
 import cv2
 import json
 from functools import partial
-# Hata almamak için doğrudan moviepy'den import et
 from moviepy import VideoFileClip
 
-# --- 1. GİRİŞ KORUMASI (Şifre Değişirse Giriş Kapanır) ---
+# --- 1. GİRİŞ KORUMASI ---
 def check_password():
     password = st.sidebar.text_input("Şifre:", type="password")
-    if password == "9Z!8W3M!!wWc8N75y4nZ": # Burayı sen belirle
+    if password == "9Z!8W3M!!wWc8N75y4nZ":
         return True
     return False
 
@@ -16,55 +15,27 @@ if not check_password():
     st.warning("Lütfen giriş yapın.")
     st.stop()
 
-# --- 2. ARAYÜZ SEÇİMİ ---
-menu = st.sidebar.radio("Mod Seç:", ["Analiz (AI)", "Düzenleme (Render)"])
-
-if menu == "Analiz (AI)":
-    st.header("🔍 Video Analiz İstasyonu")
-    # BURAYA: Videoyu yükle, Gemini'ye tek seferde gönder, JSON al ve 'plan.json' olarak kaydet.
-    if st.button("Analizi Başlat"):
-        st.write("Gemini videoyu inceliyor... (Tek seferde tüm önemli anları alıyorum)")
-        # Gemini'ye "Tüm önemli anları [saniye, saniye] formatında JSON döndür" diyeceğiz.
-        
-elif menu == "Düzenleme (Render)":
-    st.header("🎬 Kurgu Fabrikası")
-    # BURAYA: plan.json dosyasını oku ve videoyu işle.
-    if st.button("Render Başlat"):
-        # plan.json'u yükle ve apply_smart_effects fonksiyonunu çalıştır.
-        pass
-
-# --- Girişten Sonrası ---
+# --- 2. YÖNETMEN PANELİ ---
 st.title("🎬 PreBGlobal - Yönetmen Paneli")
 
-# Mod Seçimi
-mod = st.sidebar.radio("İşlem Modu:", ["Analiz", "Kurgu"])
+# Mod Seçimi (Tek bir tane olmalı)
+mod = st.sidebar.radio("İşlem Modu:", ["Analiz", "Kurgu"], key="ana_mod")
 
 if mod == "Analiz":
     st.subheader("🔍 1. Adım: Videoyu Analiz Et")
     uploaded_file = st.file_uploader("Ham videoyu yükle", type=["mp4"])
-    user_prompt = st.text_input("Gemini'ye neyi bulsun? (Örn: Çatışma anları, sessiz boşluklar)")
+    user_prompt = st.text_input("Gemini'ye neyi bulsun?", key="analiz_prompt")
     
-    if st.button("Analizi Başlat"):
-        # Buraya Gemini ile analiz yapıp 'plan.json' oluşturan fonksiyon gelecek
-        st.write("Analiz tamamlandı. Plan dosyası hazırlandı.")
+    # Butonu sadece burada bir kez tanımlıyoruz
+    if st.button("Analizi Başlat", key="analiz_btn"):
+        if uploaded_file is not None:
+            st.write("Gemini analiz ediyor... (plan.json hazırlanıyor)")
+        else:
+            st.error("Lütfen önce bir video yükle.")
 
 elif mod == "Kurgu":
     st.subheader("🛠️ 2. Adım: Kurgu Fabrikası")
-    if st.button("Kurguyu Uygula"):
-        # Buraya senin istediğin o 'islem.py' mantığı gelecek
-        # Hem 'plan.json'u okuyacak hem senin 'kurgu komutlarını' (müzik, yazı vb.) işleyecek
-        st.write("Video işleniyor, lütfen bekleyin...")
-
-# Mod seçimi yapıldığında bu blok çalışır
-if mod == "Analiz":
-    st.subheader("İşlem Seçin")
     
-    # 1. Analiz Butonu
-    if st.button("Analizi Başlat", key="analiz_btn"):
-        st.write("Analiz süreci başlatıldı...")
-        # Buraya analiz fonksiyonunu çağırabilirsin
-
-    # 2. Kurgu Butonu (Aynı blok içinde alt alta yazabilirsin)
+    # Butonu sadece burada bir kez tanımlıyoruz
     if st.button("Kurguyu Uygula", key="kurgu_btn"):
-        st.write("Kurgu süreci başlatıldı...")
-        # Buraya kurgu fonksiyonunu çağırabilirsin
+        st.write("Video işleniyor, lütfen bekleyin...")
