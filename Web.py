@@ -55,5 +55,16 @@ elif mod == "Kurgu":
         # Hem 'plan.json'u okuyacak hem senin 'kurgu komutlarını' (müzik, yazı vb.) işleyecek
         st.write("Video işleniyor, lütfen bekleyin...")
 
-if st.button("Analizi Başlat", key="analiz_btn"):
-if st.button("Kurguyu Uygula", key="kurgu_btn"):
+# Mod seçimi yapıldığında bu blok çalışır
+if mod == "Analiz":
+    st.subheader("İşlem Seçin")
+    
+    # 1. Analiz Butonu
+    if st.button("Analizi Başlat", key="analiz_btn"):
+        st.write("Analiz süreci başlatıldı...")
+        # Buraya analiz fonksiyonunu çağırabilirsin
+
+    # 2. Kurgu Butonu (Aynı blok içinde alt alta yazabilirsin)
+    if st.button("Kurguyu Uygula", key="kurgu_btn"):
+        st.write("Kurgu süreci başlatıldı...")
+        # Buraya kurgu fonksiyonunu çağırabilirsin
