@@ -1,7 +1,6 @@
 import streamlit as st
 import cv2
 import json
-from moviepy.editor import VideoFileClip
 from functools import partial
 # Hata almamak için doğrudan moviepy'den import et
 from moviepy import VideoFileClip
