@@ -1,7 +1,6 @@
 import streamlit as st
-import cv2
 import json
-from functools import partial
+import yt_dlp # Linkten indirmek için bu kütüphaneyi kullanacağız
 from moviepy import VideoFileClip
 
 # --- 1. GİRİŞ KORUMASI ---
@@ -18,24 +17,24 @@ if not check_password():
 # --- 2. YÖNETMEN PANELİ ---
 st.title("🎬 PreBGlobal - Yönetmen Paneli")
 
-# Mod Seçimi (Tek bir tane olmalı)
+# Mod Seçimi
 mod = st.sidebar.radio("İşlem Modu:", ["Analiz", "Kurgu"], key="ana_mod")
 
 if mod == "Analiz":
     st.subheader("🔍 1. Adım: Videoyu Analiz Et")
-    uploaded_file = st.file_uploader("Ham videoyu yükle", type=["mp4"])
+    # Dosya yükleyici yerine URL girişi
+    video_url = st.text_input("Videonun URL adresini girin:", key="video_url")
     user_prompt = st.text_input("Gemini'ye neyi bulsun?", key="analiz_prompt")
     
-    # Butonu sadece burada bir kez tanımlıyoruz
     if st.button("Analizi Başlat", key="analiz_btn"):
-        if uploaded_file is not None:
-            st.write("Gemini analiz ediyor... (plan.json hazırlanıyor)")
+        if video_url:
+            st.write(f"Sistem '{video_url}' adresinden videoyu alıyor...")
+            # Burada yt_dlp ile indirme başlatılacak
         else:
-            st.error("Lütfen önce bir video yükle.")
+            st.error("Lütfen önce geçerli bir video linki girin.")
 
 elif mod == "Kurgu":
     st.subheader("🛠️ 2. Adım: Kurgu Fabrikası")
     
-    # Butonu sadece burada bir kez tanımlıyoruz
     if st.button("Kurguyu Uygula", key="kurgu_btn"):
         st.write("Video işleniyor, lütfen bekleyin...")
