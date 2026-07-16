@@ -7,7 +7,7 @@ from functools import partial
 # --- 1. GİRİŞ KORUMASI (Şifre Değişirse Giriş Kapanır) ---
 def check_password():
     password = st.sidebar.text_input("Şifre:", type="password")
-    if password == "SENIN_SIFREN": # Burayı sen belirle
+    if password == "9Z!8W3M!!wWc8N75y4nZ": # Burayı sen belirle
         return True
     return False
 
