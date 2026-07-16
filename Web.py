@@ -3,6 +3,8 @@ import cv2
 import json
 from moviepy.editor import VideoFileClip
 from functools import partial
+# Hata almamak için doğrudan moviepy'den import et
+from moviepy import VideoFileClip
 
 # --- 1. GİRİŞ KORUMASI (Şifre Değişirse Giriş Kapanır) ---
 def check_password():
