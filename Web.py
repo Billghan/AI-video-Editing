@@ -1,55 +1,33 @@
 import streamlit as st
 import cv2
-import os
-import google.generativeai as genai
-from moviepy.video.io.VideoFileClip import VideoFileClip
+import json
+from moviepy.editor import VideoFileClip
 from functools import partial
 
-# Gemini Konfigürasyonu
-st.write("Secrets kontrol ediliyor...")
-if "GOOGLE_API_KEY" in st.secrets:
-    st.write("API Key bulundu!")
-else:
-    st.error("API Key hala bulunamadı! Lütfen Secrets panelini kontrol et.")
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+# --- 1. GİRİŞ KORUMASI (Şifre Değişirse Giriş Kapanır) ---
+def check_password():
+    password = st.sidebar.text_input("Şifre:", type="password")
+    if password == "SENIN_SIFREN": # Burayı sen belirle
+        return True
+    return False
 
-def get_important_seconds(video_path, prompt):
-    """Videoyu analiz edip önemli anların listesini döner."""
-    video = VideoFileClip(video_path)
-    important_seconds = []
-    
-    # Her 2 saniyede bir analiz yap (Hız için)
-    for t in range(0, int(video.duration), 2):
-        frame = video.get_frame(t)
-        cv2.imwrite("temp.jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-        sample_file = genai.upload_file("temp.jpg")
+if not check_password():
+    st.warning("Lütfen giriş yapın.")
+    st.stop()
+
+# --- 2. ARAYÜZ SEÇİMİ ---
+menu = st.sidebar.radio("Mod Seç:", ["Analiz (AI)", "Düzenleme (Render)"])
+
+if menu == "Analiz (AI)":
+    st.header("🔍 Video Analiz İstasyonu")
+    # BURAYA: Videoyu yükle, Gemini'ye tek seferde gönder, JSON al ve 'plan.json' olarak kaydet.
+    if st.button("Analizi Başlat"):
+        st.write("Gemini videoyu inceliyor... (Tek seferde tüm önemli anları alıyorum)")
+        # Gemini'ye "Tüm önemli anları [saniye, saniye] formatında JSON döndür" diyeceğiz.
         
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content([sample_file, f"Bu görüntüde '{prompt}' ile ilgili önemli bir an var mı? Sadece EVET veya HAYIR de."])
-        
-        if "EVET" in response.text.upper():
-            important_seconds.append(t)
-            
-    return important_seconds
-
-def apply_smart_effects(get_frame, t, important_seconds):
-    frame = get_frame(t)
-    # Eğer o an önemli anlar listesindeyse efekt ekle
-    if any(abs(t - sec) < 1 for sec in important_seconds):
-        cv2.circle(frame, (640, 360), 100, (0, 0, 255), 5)
-        cv2.putText(frame, "ONEMLI AN!", (500, 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    return frame
-
-# --- BUTON İÇİ ---
-if st.button("Akıllı Düzenlemeyi Başlat"):
-    # 1. Önce Analiz
-    st.write("Video analiz ediliyor, lütfen bekle...")
-    important_moments = get_important_seconds("input.mp4", user_prompt)
-    
-    # 2. Sonra Render
-    video = VideoFileClip("input.mp4")
-    processed_func = partial(apply_smart_effects, important_seconds=important_moments)
-    final_clip = video.transform(processed_func)
-    
-    final_clip.write_videofile("final_video.mp4")
-    st.video("final_video.mp4")
+elif menu == "Düzenleme (Render)":
+    st.header("🎬 Kurgu Fabrikası")
+    # BURAYA: plan.json dosyasını oku ve videoyu işle.
+    if st.button("Render Başlat"):
+        # plan.json'u yükle ve apply_smart_effects fonksiyonunu çalıştır.
+        pass
