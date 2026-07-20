@@ -2,26 +2,9 @@ import streamlit as st
 import json
 import yt_dlp
 from moviepy import VideoFileClip
-# Modülleri en tepede bağlıyoruz
-import Analiz
-import İşlem
-import google.generativeai as genai
-import streamlit as st
+import analiz
+import islem
 
-def analiz_et(video_url, prompt):
-    api_key = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
-    
-    # Buradaki model ismini elindeki yetkiye göre güncelle
-    # Örnek: 'gemini-2.0-flash' veya elindeki model adı neyse onu yaz
-    model = genai.GenerativeModel('gemini-2.0-flash') 
-    
-    full_prompt = f"Video linki: {video_url}. Kullanıcı isteği: {prompt}. Videodaki gereksiz, sabit anların saniye aralıklarını [başlangıç, bitiş] formatında, sadece JSON listesi olarak ver."
-    
-    response = model.generate_content(full_prompt)
-    return response.text
-    
-# --- 1. GİRİŞ KORUMASI ---
 def check_password():
     password = st.sidebar.text_input("Şifre:", type="password")
     if password == "9Z!8W3M!!wWc8N75y4nZ":
@@ -32,10 +15,8 @@ if not check_password():
     st.warning("Lütfen giriş yapın.")
     st.stop()
 
-# --- 2. YÖNETMEN PANELİ ---
 st.title("🎬 PreBGlobal - Yönetmen Paneli")
 
-# Mod Seçimi
 mod = st.sidebar.radio("İşlem Modu:", ["Analiz", "Kurgu"], key="ana_mod")
 
 if mod == "Analiz":
@@ -46,8 +27,7 @@ if mod == "Analiz":
     if st.button("Analizi Başlat", key="analiz_btn"):
         if video_url:
             with st.spinner("Video analiz ediliyor..."):
-                # analiz.py içindeki fonksiyon çağrıldı
-                sonuc = Analiz.analiz_et(video_url, user_prompt)
+                sonuc = analiz.analiz_et(video_url, user_prompt)
                 st.json(sonuc)
                 st.session_state['analiz_sonucu'] = sonuc
                 st.success("Analiz tamamlandı!")
@@ -60,9 +40,7 @@ elif mod == "Kurgu":
     if st.button("Kurguyu Uygula", key="kurgu_btn"):
         if 'analiz_sonucu' in st.session_state:
             with st.spinner("Kurgu yapılıyor, lütfen bekleyin..."):
-                # işlem.py içindeki fonksiyon çağrıldı
-                # Buraya video indirme kodunu da entegre edeceğiz
-                cikti = işlem.kurgula("temp_video.mp4", st.session_state['analiz_sonucu'])
+                cikti = islem.kurgula("temp_video.mp4", st.session_state['analiz_sonucu'])
                 st.success(f"Video hazır: {cikti}")
         else:
             st.error("Önce Analiz modundan bir plan oluşturmalısın!")
