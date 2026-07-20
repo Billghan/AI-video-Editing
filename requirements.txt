@@ -1,6 +1,5 @@
-opencv-python-headless
-moviepy
-numpy
-yt-dlp
 streamlit
 google-generativeai
+moviepy
+yt-dlp
+gitpython
