@@ -1,3 +1,5 @@
+import analiz
+import işlem
 import streamlit as st
 import json
 import yt_dlp # Linkten indirmek için bu kütüphaneyi kullanacağız
