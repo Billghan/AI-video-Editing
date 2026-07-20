@@ -2,8 +2,8 @@ import streamlit as st
 import json
 import yt_dlp
 from moviepy import VideoFileClip
-import analiz
-import islem
+import Analiz
+import İşlem
 
 def check_password():
     password = st.sidebar.text_input("Şifre:", type="password")
@@ -27,7 +27,7 @@ if mod == "Analiz":
     if st.button("Analizi Başlat", key="analiz_btn"):
         if video_url:
             with st.spinner("Video analiz ediliyor..."):
-                sonuc = analiz.analiz_et(video_url, user_prompt)
+                sonuc = analiz.Analiz_et(video_url, user_prompt)
                 st.json(sonuc)
                 st.session_state['analiz_sonucu'] = sonuc
                 st.success("Analiz tamamlandı!")
