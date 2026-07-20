@@ -5,7 +5,22 @@ from moviepy import VideoFileClip
 # Modülleri en tepede bağlıyoruz
 import Analiz
 import İşlem
+import google.generativeai as genai
+import streamlit as st
 
+def analiz_et(video_url, prompt):
+    api_key = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=api_key)
+    
+    # Buradaki model ismini elindeki yetkiye göre güncelle
+    # Örnek: 'gemini-2.0-flash' veya elindeki model adı neyse onu yaz
+    model = genai.GenerativeModel('gemini-2.0-flash') 
+    
+    full_prompt = f"Video linki: {video_url}. Kullanıcı isteği: {prompt}. Videodaki gereksiz, sabit anların saniye aralıklarını [başlangıç, bitiş] formatında, sadece JSON listesi olarak ver."
+    
+    response = model.generate_content(full_prompt)
+    return response.text
+    
 # --- 1. GİRİŞ KORUMASI ---
 def check_password():
     password = st.sidebar.text_input("Şifre:", type="password")
