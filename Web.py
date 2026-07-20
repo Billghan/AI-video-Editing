@@ -3,8 +3,8 @@ import json
 import yt_dlp
 from moviepy import VideoFileClip
 # Modülleri en tepede bağlıyoruz
-import analiz
-import işlem
+import Analiz
+import İşlem
 
 # --- 1. GİRİŞ KORUMASI ---
 def check_password():
