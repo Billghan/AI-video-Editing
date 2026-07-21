@@ -26,12 +26,12 @@ if mod == "Analiz":
     st.subheader("🔍 1. Adım: Videoyu Analiz Et")
     video_url = st.text_input("Videonun URL adresini girin:", key="video_url")
     user_prompt = st.text_input("Gemini'ye neyi bulsun?", key="analiz_prompt")
-    
-    if st.button("Analizi Başlat", key="analiz_btn"):
+
+if st.button("Analizi Başlat", key="analiz_btn"):
         if video_url:
             with st.spinner("Video analiz ediliyor..."):
+                # Bu satırin başındaki boşlukların tam hizasında olduğundan emin ol
                 sonuc = analiz.analiz_et(video_url, user_prompt)
-              sonuc = analiz.analiz_et(video_url, user_prompt)
                 st.json(sonuc)
                 st.session_state['analiz_sonucu'] = sonuc
                 st.success("Analiz tamamlandı!")
