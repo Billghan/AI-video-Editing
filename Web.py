@@ -31,6 +31,7 @@ if mod == "Analiz":
         if video_url:
             with st.spinner("Video analiz ediliyor..."):
                 sonuc = analiz.analiz_et(video_url, user_prompt)
+              sonuc = analiz.analiz_et(video_url, user_prompt)
                 st.json(sonuc)
                 st.session_state['analiz_sonucu'] = sonuc
                 st.success("Analiz tamamlandı!")
