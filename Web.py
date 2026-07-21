@@ -4,7 +4,6 @@ import yt_dlp
 from moviepy import VideoFileClip
 import analiz
 import islem
-import google.generativeai as genai
 
 # analiz.py içinde model tanımını bu şekilde güncelle:
 model = genai.GenerativeModel('gemini-3.5-flash') 
