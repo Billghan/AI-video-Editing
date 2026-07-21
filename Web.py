@@ -5,6 +5,9 @@ from moviepy import VideoFileClip
 import analiz
 import islem
 
+# analiz.py içinde model tanımını bu şekilde güncelle:
+model = genai.GenerativeModel('gemini-3.5-flash') 
+
 def check_password():
     password = st.sidebar.text_input("Şifre:", type="password")
     if password == "9Z!8W3M!!wWc8N75y4nZ":
